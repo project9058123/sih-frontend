@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mentor Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            overflow: hidden;
+            height: 100vh;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(to bottom, #87CEEB, #FFFFFF);
+        }
+
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .clouds {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 150px;
+            background: url('https://i.imgur.com/DRMm6ra.png') repeat-x;
+            animation: moveClouds 30s linear infinite;
+            z-index: -1;
+        }
+
+        @keyframes moveClouds {
+            from {
+                background-position: 0 0;
+            }
+            to {
+                background-position: -10000px 0;
+            }
+        }
+
+        .login-container {
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 400px;
+            transform: perspective(500px) rotateY(10deg);
+            transition: transform 0.3s ease;
+        }
+
+        .login-container:hover {
+            transform: perspective(500px) rotateY(0deg);
+        }
+
+        .login-container h3 {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .login-container input {
+            margin-bottom: 15px;
+        }
+
+        .login-container button {
+            width: 100%;
+            padding: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            background-color: #2575fc;
+            border: none;
+            color: white;
+            cursor: pointer;
+        }
+
+        .login-container button:hover {
+            background-color: #6a11cb;
+        }
+
+        .footer {
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            text-align: center;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+
+        .footer p {
+            margin: 0;
+            color: #ccc;
+        }
+
+        .falling-words {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .word {
+            position: absolute;
+            font-size: 16px;
+            font-weight: normal;
+            color: white;
+            opacity: 1;
+            animation: fall 10s linear infinite, shrink 10s linear infinite;
+        }
+
+        @keyframes fall {
+            from {
+                transform: translateY(-100%);
+            }
+            to {
+                transform: translateY(100vh);
+            }
+        }
+
+        @keyframes shrink {
+            0% {
+                transform: translateY(-100%);
+                font-size: 16px;
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh);
+                font-size: 8px;
+                opacity: 0;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Clouds Animation -->
+    <div class="clouds"></div>
+
+    <!-- Falling Words -->
+    <div class="falling-words" id="falling-words"></div>
+
+    <!-- Login Form -->
+    <div class="login-container">
+        <h3 class="text-center">Mentor Login</h3>
+        <form id="mentor-login-form">
+            <div class="mb-3">
+                <label for="mentor-username" class="form-label">Username</label>
+                <input type="text" class="form-control" id="mentor-username" placeholder="Enter your username" required>
+            </div>
+            <div class="mb-3">
+                <label for="mentor-password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="mentor-password" placeholder="Enter your password" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Login</button>
+        </form>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2024 Mentor Portal. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Falling words logic
+        const words = ['Welcome', 'Mentor', 'Inspire', 'Guide', 'Success', 'Achieve'];
+        const fallingWordsContainer = document.getElementById('falling-words');
+
+        function createFallingWord() {
+            const word = document.createElement('div');
+            word.classList.add('word');
+            word.textContent = words[Math.floor(Math.random() * words.length)];
+
+            word.style.left = Math.random() * 100 + 'vw';
+            word.style.animationDuration = Math.random() * 5 + 5 + 's';
+
+            fallingWordsContainer.appendChild(word);
+
+            setTimeout(() => {
+                word.remove();
+            }, 10000);
+        }
+
+        setInterval(createFallingWord, 300);
+
+        // Simple form submission logic (placeholder)
+        document.getElementById('mentor-login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('mentor-username').value;
+            const password = document.getElementById('mentor-password').value;
+
+            if (username && password) {
+                alert('Login Successful! Redirecting to mentor dashboard...');
+                window.location.href = 'mentor.html'; // Redirect to mentor dashboard
+            } else {
+                alert('Please fill in both fields.');
+            }
+        });
+    </script>
+</body>
+</html>
+

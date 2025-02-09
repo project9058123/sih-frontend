@@ -1,0 +1,90 @@
+/* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* Container */
+.container {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 400px;
+    text-align: center;
+}
+
+/* Project Details */
+#project-details {
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+#project-details h3 {
+    color: #333;
+    margin-bottom: 10px;
+}
+
+#project-details p {
+    font-size: 14px;
+    color: #666;
+}
+
+/* Evaluation Section */
+.evaluation {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+button {
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: 0.3s ease-in-out;
+}
+
+#select-btn {
+    background-color: #28a745;
+    color: white;
+}
+
+#reject-btn {
+    background-color: #dc3545;
+    color: white;
+}
+
+#submit-btn {
+    background-color: #007bff;
+    color: white;
+}
+
+button:hover {
+    opacity: 0.8;
+}
+
+/* Active Button Highlight */
+button.active {
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+    transform: scale(1.05);
+}
+
+/* Feedback Textarea */
+#feedback {
+    display: none;
+    width: calc(100% - 20px);
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    resize: none;
+    font-size: 14px;
+}
+
