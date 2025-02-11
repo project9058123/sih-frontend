@@ -163,15 +163,21 @@
             });
 
             document.getElementById('assign-mentor-btn').addEventListener('click', () => {
-                const selectedProject = document.getElementById('project-select').value;
-                const selectedMentor = document.getElementById('mentor-select').value;
+    const selectedProject = document.getElementById('project-select').value;
+    const selectedMentor = document.getElementById('mentor-select').value;
 
-                if (selectedProject && selectedMentor) {
-                    alert(`Mentor assigned! Email sent to ${selectedMentor}`);
-                } else {
-                    alert('Please select both a project and a mentor.');
-                }
-            });
+    if (selectedProject && selectedMentor) {
+        const subject = encodeURIComponent("Mentor Assignment Notification");
+        const body = encodeURIComponent(`Dear Mentor,\n\nYou have been assigned as a mentor for the project: ${selectedProject}.\n\nThank you.`);
+        const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${selectedMentor}&su=${subject}&body=${body}`;
+
+        alert(`Mentor assigned! Redirecting to email...`);
+        window.open(gmailUrl, '_blank'); // Opens Gmail in a new tab
+    } else {
+        alert('Please select both a project and a mentor.');
+    }
+});
+
         }
 
         function sendEmail(recipientEmail, message) {

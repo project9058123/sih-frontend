@@ -35,6 +35,8 @@
                                 <h6>Project Title: Innovative Solution</h6>
                                 <p>Description: A project focused on innovative solutions for modern problems.</p>
                                 <button class="btn btn-primary btn-evaluate evaluate-btn" data-project="project1.pdf">Evaluate</button>
+                                
+
                             </div>
                         </div>
                         
@@ -45,20 +47,41 @@
     </div>
 
     <script>
+        // Handle Assign Mentor button click
+
         document.addEventListener('DOMContentLoaded', () => {
-            // Handle Evaluate button click
-            const evaluateButtons = document.querySelectorAll('.evaluate-btn');
-            evaluateButtons.forEach(button => {
-                button.addEventListener('click', (e) => {
-                    const projectFile = e.target.getAttribute('data-project');
-                    if (projectFile) {
-                        window.location.href = `view.html?file=${encodeURIComponent(projectFile)}`;
-                    } else {
-                        alert('No project file associated.');
-                    }
-                });
-            });
+    // Handle Assign Mentor button click
+    const assignButtons = document.querySelectorAll('.assign-btn');
+    assignButtons.forEach(button => {
+        button.addEventListener('click', (e) => {
+            const mentorEmail = e.target.getAttribute('data-email');
+            if (mentorEmail) {
+                const confirmAssign = confirm("Do you want to assign this mentor and send an email?");
+                if (confirmAssign) {
+                    window.location.href = `mailto:${mentorEmail}?subject=Mentor%20Assignment&body=You%20have%20been%20assigned%20as%20a%20mentor%20for%20this%20project.`;
+                }
+            } else {
+                alert('No mentor email associated.');
+            }
         });
+    });
+
+    // Handle Evaluate button click
+    const evaluateButtons = document.querySelectorAll('.evaluate-btn');
+    evaluateButtons.forEach(button => {
+        button.addEventListener('click', (e) => {
+            const projectFile = e.target.getAttribute('data-project');
+            if (projectFile) {
+                window.location.href = `view.html?file=${encodeURIComponent(projectFile)}`;
+            } else {
+                alert('No project file associated.');
+            }
+        });
+    });
+});
+
+        
+        
         const mailOptions = {
     from: 'your-email@gmail.com',
     to: recipientEmail,
