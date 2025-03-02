@@ -5,73 +5,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mentor Login</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+</head>
+<body>
     <style>
+        /* General Styles */
         body {
             font-family: 'Arial', sans-serif;
-            margin: 0;
-            overflow: hidden;
-            height: 100vh;
-            color: #fff;
+            background: linear-gradient(to right, #e9ebee, #f3f1f5);
             display: flex;
             justify-content: center;
             align-items: center;
-            background: linear-gradient(to bottom, #87CEEB, #FFFFFF);
+            height: 100vh;
+            margin: 0;
         }
 
-        canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-        }
-
-        .clouds {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 150px;
-            background: url('https://i.imgur.com/DRMm6ra.png') repeat-x;
-            animation: moveClouds 30s linear infinite;
-            z-index: -1;
-        }
-
-        @keyframes moveClouds {
-            from {
-                background-position: 0 0;
-            }
-            to {
-                background-position: -10000px 0;
-            }
-        }
-
+        /* Login Container */
         .login-container {
-            background-color: rgba(0, 0, 0, 0.7);
+            background-color: rgba(255, 255, 255, 0.9);
             padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
             width: 100%;
             max-width: 400px;
-            transform: perspective(500px) rotateY(10deg);
-            transition: transform 0.3s ease;
+            text-align: center;
         }
 
-        .login-container:hover {
-            transform: perspective(500px) rotateY(0deg);
-        }
-
+        /* Heading */
         .login-container h3 {
-            font-size: 2rem;
-            font-weight: 600;
+            color: #333;
+            font-size: 1.8rem;
             margin-bottom: 20px;
         }
 
-        .login-container input {
-            margin-bottom: 15px;
+        /* Input Fields */
+        .login-container .form-control {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            font-size: 1rem;
         }
 
+        /* Input Field Focus */
+        .login-container .form-control:focus {
+            border-color: #2575fc;
+            box-shadow: 0px 0px 5px rgba(37, 117, 252, 0.5);
+        }
+
+        /* Button */
         .login-container button {
             width: 100%;
             padding: 10px;
@@ -80,84 +60,35 @@
             background-color: #2575fc;
             border: none;
             color: white;
+            border-radius: 5px;
             cursor: pointer;
+            transition: 0.3s;
         }
 
         .login-container button:hover {
             background-color: #6a11cb;
         }
 
+        /* Footer */
         .footer {
-            background-color: rgba(0, 0, 0, 0.8);
-            padding: 20px;
-            text-align: center;
             position: fixed;
             bottom: 0;
             width: 100%;
-        }
-
-        .footer p {
-            margin: 0;
-            color: #ccc;
-        }
-
-        .falling-words {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            z-index: -1;
-        }
-
-        .word {
-            position: absolute;
-            font-size: 16px;
-            font-weight: normal;
+            background-color: rgba(0, 0, 0, 0.8);
+            text-align: center;
+            padding: 10px;
             color: white;
-            opacity: 1;
-            animation: fall 10s linear infinite, shrink 10s linear infinite;
+            font-size: 0.9rem;
         }
-
-        @keyframes fall {
-            from {
-                transform: translateY(-100%);
-            }
-            to {
-                transform: translateY(100vh);
-            }
-        }
-
-        @keyframes shrink {
-            0% {
-                transform: translateY(-100%);
-                font-size: 16px;
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(100vh);
-                font-size: 8px;
-                opacity: 0;
-            }
-        }
-
     </style>
-</head>
-<body>
-    <!-- Clouds Animation -->
-    <div class="clouds"></div>
-
-    <!-- Falling Words -->
-    <div class="falling-words" id="falling-words"></div>
-
+    
     <!-- Login Form -->
     <div class="login-container">
         <h3 class="text-center">Mentor Login</h3>
         <form id="mentor-login-form">
             <div class="mb-3">
-                <label for="mentor-username" class="form-label">Username</label>
-                <input type="text" class="form-control" id="mentor-username" placeholder="Enter your username" required>
+                <label for="mentor-email" class="form-label">Email</label>
+                <input type="text" class="form-control" id="mentor-email" placeholder="Enter your email" required>
             </div>
             <div class="mb-3">
                 <label for="mentor-password" class="form-label">Password</label>
@@ -173,41 +104,34 @@
     </footer>
 
     <script>
-        // Falling words logic
-        const words = ['Welcome', 'Mentor', 'Inspire', 'Guide', 'Success', 'Achieve'];
-        const fallingWordsContainer = document.getElementById('falling-words');
+        document.getElementById('mentor-login-form').addEventListener('submit', function (e) {
+    e.preventDefault();
 
-        function createFallingWord() {
-            const word = document.createElement('div');
-            word.classList.add('word');
-            word.textContent = words[Math.floor(Math.random() * words.length)];
+    const email = document.getElementById('mentor-email').value.trim();
+    const password = document.getElementById('mentor-password').value.trim();
 
-            word.style.left = Math.random() * 100 + 'vw';
-            word.style.animationDuration = Math.random() * 5 + 5 + 's';
+    if (!email || !password) {
+        alert('Please fill in both fields.');
+        return;
+    }
 
-            fallingWordsContainer.appendChild(word);
+    // Extract the part before '@' and convert it to uppercase
+    const expectedPassword = email.split('@')[0].toUpperCase();
 
-            setTimeout(() => {
-                word.remove();
-            }, 10000);
-        }
+    if (password === expectedPassword) {
+        alert('Login Successful! Redirecting to mentor dashboard...');
 
-        setInterval(createFallingWord, 300);
+        // ✅ Store the mentor's email in localStorage
+        localStorage.setItem('mentorEmail', email);
 
-        // Simple form submission logic (placeholder)
-        document.getElementById('mentor-login-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const username = document.getElementById('mentor-username').value;
-            const password = document.getElementById('mentor-password').value;
+        // Redirect to mentor.html
+        window.location.href = 'mentor.html';
+    } else {
+        alert('Invalid email or password. Please try again.');
+    }
+});
 
-            if (username && password) {
-                alert('Login Successful! Redirecting to mentor dashboard...');
-                window.location.href = 'mentor.html'; // Redirect to mentor dashboard
-            } else {
-                alert('Please fill in both fields.');
-            }
-        });
     </script>
+
 </body>
 </html>
-
