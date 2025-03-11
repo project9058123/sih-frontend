@@ -3,167 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mentor - Assigned Projects & Evaluation</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
-    <style>
-        body {
-            background: #f8f9fa;
-            font-family: Arial, sans-serif;
-            padding: 20px;
-        }
-        .container {
-            background: #fff;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        }
-        .table {
-            margin-top: 20px;
-        }
-        .download-btn {
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            background-color: #007bff;
-        }
-        .download-btn:hover { background-color: #0056b3; }
-        .submit-btn {
-            background-color: #28a745;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .submit-btn:hover { background-color: #218838; }
-    </style>
+    <title>Mentor Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container mt-5">
-        <button onclick="logout()" class="btn btn-danger mb-3">Logout</button>
-        <h2 class="text-center">Mentor - Assigned Projects</h2>
-        <div class="table-responsive">
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Team ID</th>
-                        <th>Title</th>
-                        <th>Problem Statement</th>
-                        <th>Allotted Marks (10)</th>
-                        <th>Presentation</th>
-                        <th>Code Quality</th>
-                        <th>Innovation</th>
-                        <th>Other Criteria</th>
-                        <th>Total</th>
-                        <th>Download</th>
-                        <th>Submit</th>
-                    </tr>
-                </thead>
-                <tbody id="mentorProjectList"></tbody>
-            </table>
-        </div>
-    </div>
+    <h2>Mentor Dashboard</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Project Title</th>
+                <th>Student Name</th>
+                <th>Roll Number</th>
+                <th>Project File</th>
+                <th>Marks</th>
+                <th>Evaluation</th>
+            </tr>
+        </thead>
+        <tbody id="projectList">
+            <!-- Projects will be loaded here -->
+        </tbody>
+    </table>
 
     <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const mentorEmail = localStorage.getItem('mentorEmail');
+        document.addEventListener("DOMContentLoaded", async () => {
+            const mentorEmail = localStorage.getItem("mentorEmail");
             if (!mentorEmail) {
-                alert('Session expired. Please login again.');
-                window.location.href = 'mentor-login.html';
-            } else {
-                loadMentorProjects();
-            }
-        });
-
-        async function loadMentorProjects() {
-            const mentorEmail = localStorage.getItem('mentorEmail'); 
-            if (!mentorEmail) return;
-
-            try {
-                const response = await fetch(`http://localhost:3000/api/mentor_projects?email=${mentorEmail}`);
-                if (!response.ok) throw new Error("Failed to fetch projects");
-
-                const projects = await response.json();
-                let projectList = document.getElementById("mentorProjectList");
-
-                projectList.innerHTML = projects.length > 0 ? projects.map(p => 
-                    `<tr>
-                        <td>${p.team_id}</td>
-                        <td>${p.project_title}</td>
-                        <td>${p.problem_statement}</td>
-                        <td><input type="number" class="form-control" min="0" max="10" oninput="calculateTotal(this)"></td>
-                        <td><input type="number" class="form-control" min="0" max="10" oninput="calculateTotal(this)"></td>
-                        <td><input type="number" class="form-control" min="0" max="10" oninput="calculateTotal(this)"></td>
-                        <td><input type="number" class="form-control" min="0" max="10" oninput="calculateTotal(this)"></td>
-                        <td><input type="number" class="form-control" min="0" max="10" oninput="calculateTotal(this)"></td>
-                        <td><input type="text" class="form-control totalMarks" readonly></td>
-                        <td><a href="/uploads/${p.project_file}" class="download-btn" download>Download</a></td>
-                        <td><button class="submit-btn" onclick="submitMarks('${p.student_email}', this)">Submit</button></td>
-                    </tr>`
-                ).join('') 
-                : `<tr><td colspan="11" class="text-center">No projects assigned</td></tr>`;
-            } catch (error) {
-                console.error(error);
-                alert("Error loading projects. Please try again later.");
-            }
-        }
-
-        function calculateTotal(input) {
-            let row = input.closest("tr");
-            let inputs = row.querySelectorAll("input[type='number']");
-            let total = 0;
-
-            inputs.forEach(inp => {
-                let value = parseInt(inp.value) || 0;
-                total += value;
-            });
-
-            row.querySelector(".totalMarks").value = total;
-        }
-
-        async function submitMarks(studentEmail, button) {
-            let row = button.closest("tr");
-            let totalMarks = row.querySelector(".totalMarks").value;
-
-            if (!totalMarks || isNaN(totalMarks)) {
-                alert("❌ Please enter valid marks before submitting.");
+                alert("Mentor email not found. Please login again.");
+                window.location.href = "mentorlog.html";  // Redirect if not logged in
                 return;
             }
 
-            const data = { email: studentEmail, total: parseInt(totalMarks) };
+            try {
+                const response = await fetch(`/api/mentor_projects?email=${mentorEmail}`);
+                const projects = await response.json();
+                const projectList = document.getElementById("projectList");
+
+                if (projects.length === 0) {
+                    projectList.innerHTML = "<tr><td colspan='6'>No projects assigned.</td></tr>";
+                    return;
+                }
+
+                projects.forEach(project => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td>${project.project_title}</td>
+                        <td>${project.student_name}</td>
+                        <td>${project.roll_number}</td>
+                        <td><a href="${project.project_file}" target="_blank">Download</a></td>
+                        <td><input type="number" id="marks-${project.id}" min="0" max="50"></td>
+                        <td><button onclick="submitEvaluation(${project.id})">Submit</button></td>
+                    `;
+                    projectList.appendChild(row);
+                });
+
+            } catch (error) {
+                console.error("Error fetching mentor projects:", error);
+            }
+        });
+
+        async function submitEvaluation(projectId) {
+            const marks = document.getElementById(`marks-${projectId}`).value;
+            if (!marks || marks < 0 || marks > 50) {
+                alert("Please enter valid marks (0-50).");
+                return;
+            }
 
             try {
-                const response = await fetch("http://localhost:3000/api/send_student_marks", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(data)
+                const response = await fetch('/api/save_grade', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        projectId: projectId, 
+                        total: marks 
+                    })
                 });
 
                 const result = await response.json();
-                console.log(result); // Debugging
-
-                if (result.success) {
-                    alert("✅ Marks published and sent to student successfully!");
-                    button.disabled = true; 
+                if (response.ok) {
+                    alert(result.message);  // Show success message
                 } else {
-                    alert("❌ Error: " + result.error);
+                    alert("Error: " + (result.message || "Something went wrong"));
                 }
             } catch (error) {
-                console.error(error);
-                alert("❌ Error submitting marks. Please try again.");
+                console.error("Error submitting marks:", error);
+                alert("Failed to save marks. Please try again.");
             }
         }
-
-        function logout() {
-            localStorage.removeItem('mentorEmail');
-            window.location.href = 'mentor-login.html';
-        }
-
-        
     </script>
-
-    
 </body>
 </html>

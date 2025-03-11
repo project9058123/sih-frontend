@@ -9,7 +9,6 @@
         .scrollable-table {
             max-height: 400px;
             overflow-y: auto;
-            overflow-x: auto;
             display: block;
             white-space: nowrap;
         }
@@ -21,9 +20,13 @@
 <body>
     <div class="container mt-5">
         <h2>Project Evaluation System</h2>
+        
+        <!-- Search for projects -->
         <div class="search-container">
             <input type="text" id="searchProjects" class="form-control" placeholder="Search Projects...">
         </div>
+
+        <!-- Project Table -->
         <div class="table-responsive scrollable-table">
             <table class="table">
                 <thead>
@@ -38,8 +41,12 @@
                 <tbody id="project-list"></tbody>
             </table>
         </div>
+
+        <!-- Assign Mentor Button -->
         <button class="btn btn-warning mt-3" onclick="openMentorModal()">Assign Mentor</button>
     </div>
+
+    <!-- Mentor Assignment Modal -->
     <div class="modal fade" id="mentorModal" tabindex="-1" aria-labelledby="mentorModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -48,11 +55,18 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
+                    <!-- Search Mentors -->
                     <input type="text" id="searchMentors" class="form-control mb-2" placeholder="Search Mentors...">
+                    
                     <label for="mentorSelect">Select Mentor:</label>
-                    <select id="mentorSelect" class="form-select"></select>
+                    <select id="mentorSelect" class="form-select">
+                        <option value="">Select a Mentor</option>
+                    </select>
+
                     <label for="projectSelect" class="mt-3">Select Project:</label>
-                    <select id="projectSelect" class="form-select"></select>
+                    <select id="projectSelect" class="form-select">
+                        <option value="">Select a Project</option>
+                    </select>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -61,6 +75,8 @@
             </div>
         </div>
     </div>
+
+    <!-- JavaScript Code -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             fetchProjects();
@@ -69,115 +85,220 @@
             document.getElementById('searchMentors').addEventListener('input', filterMentors);
         });
 
+        // Fetch projects from backend
         function fetchProjects() {
-    fetch('http://localhost:3000/api/view_projects')
-        .then(response => response.json())
-        .then(data => {
-            const projectList = document.getElementById('project-list');
-            const projectSelect = document.getElementById('projectSelect'); // Get the project dropdown
-            projectList.innerHTML = '';
-            projectSelect.innerHTML = '<option value="">Select a Project</option>'; // Reset dropdown
+            fetch('http://localhost:3000/api/view_projects')
+                .then(response => response.json())
+                .then(data => {
+                    const projectList = document.getElementById('project-list');
+                    const projectSelect = document.getElementById('projectSelect');
+                    projectList.innerHTML = '';
+                    projectSelect.innerHTML = '<option value="">Select a Project</option>';
 
-            data.forEach(project => {
-                // Populate table
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${project.roll_number}</td>
-                    <td>${project.student_name}</td>
-                    <td>${project.project_title}</td>
-                    <td><a href="uploads/${project.project_file}" target="_blank">Download</a></td>
-                    <td>
-                        <button onclick="updateProjectStatus('${project.id}', 'Selected')" class="btn btn-success">Select</button>
-                        <button onclick="showRejectPrompt('${project.id}')" class="btn btn-danger">Reject</button>
-                    </td>
-                `;
-                projectList.appendChild(row);
+                    data.forEach(project => {
+                        // Populate table
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${project.roll_number}</td>
+                            <td>${project.student_name}</td>
+                            <td>${project.project_title}</td>
+                            <td><a href="uploads/${project.project_file}" target="_blank">Download</a></td>
+                            <td>
+                                <button onclick="updateProjectStatus('${project.id}', 'Selected')" class="btn btn-success">Select</button>
+                                <button onclick="showRejectPrompt('${project.id}')" class="btn btn-danger">Reject</button>
+                            </td>
+                        `;
+                        projectList.appendChild(row);
 
-                // Populate project dropdown in the mentor modal
-                let option = document.createElement("option");
-                option.value = project.id;
-                option.textContent = `${project.project_title} (Roll No: ${project.roll_number})`;
-                projectSelect.appendChild(option);
-            });
-        })
-        .catch(error => console.error("❌ Error fetching projects:", error));
+                        // Populate project dropdown in mentor modal
+                        let option = document.createElement("option");
+                        option.value = project.id;
+                        option.textContent = `${project.project_title} (Roll No: ${project.roll_number})`;
+                        projectSelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error("❌ Error fetching projects:", error));
+        }
+
+        // Fetch mentors from backend
+        function fetchMentors() {
+            fetch('http://localhost:3000/api/get_mentors')
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.success) {
+                        throw new Error("Failed to fetch mentors");
+                    }
+
+                    const mentors = data.data; // Access the actual array
+                    const mentorSelect = document.getElementById('mentorSelect');
+                    mentorSelect.innerHTML = '<option value="">Select a Mentor</option>';
+                    
+                    mentors.forEach(mentor => {
+                        let option = document.createElement("option");
+                        option.value = mentor.mentor_email;
+                        option.textContent = `${mentor.mentor_name} (${mentor.mentor_email})`;
+                        mentorSelect.appendChild(option);
+                    });
+
+                    console.log("✅ Mentors loaded successfully:", mentors);
+                })
+                .catch(error => console.error("❌ Error fetching mentors:", error));
+        }
+
+        // Open the mentor modal
+        function openMentorModal() {
+            if (document.getElementById("mentorSelect").children.length === 1) {
+                fetchMentors();
+            }
+            new bootstrap.Modal(document.getElementById("mentorModal")).show();
+        }
+
+        // Assign mentor to project
+        function assignMentor() {
+    const projectId = document.getElementById("projectSelect").value;
+    const mentorEmail = document.getElementById("mentorSelect").value;
+    
+    if (!projectId || !mentorEmail) {
+        alert("⚠️ Please select both a project and a mentor.");
+        return;
+    }
+
+    fetch("http://localhost:3000/api/assign_mentor", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ projectId, mentorEmail })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert("✅ Mentor assigned successfully! Email sent to mentor.");
+            fetchProjects(); // Refresh the list
+            bootstrap.Modal.getInstance(document.getElementById("mentorModal")).hide();
+        } else {
+            alert("❌ Error: " + data.message);
+        }
+    })
+    .catch(error => console.error("❌ Error:", error));
 }
 
 
-// Function to update project status (Select/Reject)
-function updateProjectStatus(projectId, status, feedback = '') {
+        // Show rejection prompt
+        function showRejectPrompt(projectId) {
+            let feedback = prompt("Please enter the reason for rejection:");
+            if (!feedback) {
+                alert("Rejection reason is required!");
+                return;
+            }
+            updateProjectStatus(projectId, "Rejected", feedback);
+        }
+
+        app.post("/api/update_project_status", async (req, res) => {
+    const { projectId, status, feedback } = req.body;
+
+    if (!projectId || !status) {
+        console.log("❌ Missing required fields:", { projectId, status });
+        return res.status(400).json({ success: false, message: "Missing required fields" });
+    }
+
+    try {
+        console.log(`🔍 Fetching student email for Project ID: ${projectId}`);
+        
+        const [rows] = await pool.execute("SELECT email FROM projects WHERE id = ?", [projectId]);
+
+        if (rows.length === 0) {
+            console.log("❌ Project not found for ID:", projectId);
+            return res.status(404).json({ success: false, message: "Project not found" });
+        }
+
+        const studentEmail = rows[0].email;
+        console.log(`📧 Student email retrieved: ${studentEmail}`);
+
+        await pool.execute("UPDATE projects SET status = ?, rejection_reason = ? WHERE id = ?", [status, feedback, projectId]);
+        console.log(`✅ Project status updated to: ${status}`);
+
+        if (studentEmail && studentEmail.trim() !== '') {
+            let subject, message;
+            if (status === "Selected") {
+                subject = "🎉 Your Project Has Been Selected!";
+                message = `
+                    Dear Student,<br><br>
+                    Congratulations! Your project has been <b>Selected</b>. 🎉<br><br>
+                    Best regards,<br>
+                    Admin Team
+                `;
+            } else if (status === "Rejected") {
+                subject = "⚠️ Your Project Has Been Rejected";
+                message = `
+                    Dear Student,<br><br>
+                    Unfortunately, your project has been <b>Rejected</b>.<br>
+                    <b>Reason:</b> ${feedback || "No reason provided"}<br><br>
+                    Best regards,<br>
+                    Admin Team
+                `;
+            }
+
+            console.log(`📤 Attempting to send email to ${studentEmail} with subject: ${subject}`);
+
+            await sendEmail(studentEmail, subject, message, message);
+            console.log(`✅ Email sent successfully to ${studentEmail}`);
+        } else {
+            console.log("⚠️ No student email found, skipping email notification.");
+        }
+
+        res.json({ success: true, message: "Project status updated successfully!" });
+    } catch (error) {
+        console.error("❌ Error updating project status:", error.message);
+        res.status(500).json({ success: false, message: "Failed to update project status" });
+    }
+});
+
+
+        // Update project status
+        function updateProjectStatus(projectId, status, feedback = '') {
     fetch("http://localhost:3000/api/update_project_status", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+            "Content-Type": "application/json"
+        },
         body: JSON.stringify({ projectId, status, feedback })
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert(`✅ Project ${status.toLowerCase()} successfully!`);
-            fetchProjects();  // Refresh project list
+            alert(`Project ${status} successfully!`);
+            fetchProjects(); // Refresh the list
         } else {
-            alert("❌ Error: " + data.message);
+            alert("Error updating project status: " + data.message);
         }
     })
-    .catch(error => console.error("❌ Error updating project status:", error));
+    .catch(error => {
+        console.error("❌ Error:", error);
+        alert("Failed to update project status.");
+    });
 }
 
-// Show a prompt for feedback before rejecting a project
 function showRejectPrompt(projectId) {
-    const feedback = prompt("Enter feedback for rejection:");
+    const feedback = prompt("Enter rejection reason:");
     if (feedback !== null) {
         updateProjectStatus(projectId, "Rejected", feedback);
     }
 }
 
 
-        function fetchMentors() {
-    fetch('http://localhost:3000/api/get_mentors')
-        .then(response => response.json())
-        .then(mentors => {
-            console.log("Fetched Mentors:", mentors);  // 🔍 Debugging Line
-            const mentorSelect = document.getElementById('mentorSelect');
-            mentorSelect.innerHTML = '';
-            mentors.forEach(mentor => {
-                let option = document.createElement("option");
-                option.value = mentor.mentor_email;
-                option.textContent = `${mentor.mentor_name} (${mentor.mentor_email})`;
-                mentorSelect.appendChild(option);
+        // Filter projects
+        function filterProjects() {
+            let input = document.getElementById("searchProjects").value.toLowerCase();
+            document.querySelectorAll("#project-list tr").forEach(row => {
+                row.style.display = row.innerText.toLowerCase().includes(input) ? "" : "none";
             });
-        })
-        .catch(error => console.error("❌ Error fetching mentors:", error));
-}
-
-        function openMentorModal() {
-            fetchMentors();
-            fetchProjects();
-            new bootstrap.Modal(document.getElementById("mentorModal")).show();
         }
 
-        function assignMentor() {
-            const projectId = document.getElementById("projectSelect").value;
-            const mentorEmail = document.getElementById("mentorSelect").value;
-            if (!projectId || !mentorEmail) {
-                alert("⚠️ Please select both a project and a mentor.");
-                return;
-            }
-            fetch("http://localhost:3000/api/assign_mentor", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ projectId, mentorEmail })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert("✅ Mentor assigned successfully!");
-                    fetchProjects();
-                    bootstrap.Modal.getInstance(document.getElementById("mentorModal")).hide();
-                } else {
-                    alert("❌ Error: " + data.message);
-                }
-            })
-            .catch(error => console.error("❌ Error:", error));
+        // Filter mentors
+        function filterMentors() {
+            let input = document.getElementById("searchMentors").value.toLowerCase();
+            document.querySelectorAll("#mentorSelect option").forEach(option => {
+                option.style.display = option.innerText.toLowerCase().includes(input) ? "" : "none";
+            });
         }
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>

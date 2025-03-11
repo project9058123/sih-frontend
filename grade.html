@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grades Page</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h2>Project Grades</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Project Title</th>
+                <th>Student Name</th>
+                <th>Roll Number</th>
+                <th>Action</th>
+                
+            </tr>
+        </thead>
+        <tbody id="gradeList">
+            <!-- Grades will be displayed here -->
+        </tbody>
+    </table>
+    <style>
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f9;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh;
+}
+
+h2 {
+    color: #4CAF50;
+    margin-bottom: 20px;
+}
+
+table {
+    width: 80%;
+    border-collapse: collapse;
+    background-color: #ffffff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 12px 15px;
+    text-align: left;
+}
+
+th {
+    background-color: #4CAF50;
+    color: #ffffff;
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+tr:hover {
+    background-color: #f1f1f1;
+    cursor: pointer;
+}
+
+td {
+    color: #333;
+}
+
+    </style>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            try {
+                const response = await fetch('http://localhost:3000/api/get_grades');
+                // API to fetch saved grades
+                const grades = await response.json();
+                const gradeList = document.getElementById("gradeList");
+
+                if (grades.length === 0) {
+                    gradeList.innerHTML = "<tr><td colspan='4'>No grades available.</td></tr>";
+                    return;
+                }
+
+                grades.forEach(grade => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td>${grade.project_title}</td>
+                        <td>${grade.student_name}</td>
+                        <td>${grade.roll_number}</td>
+
+                        <td>
+                            <button class="publish-btn" onclick="publishResult('${grade.projectId}')">Publish Result</button>
+                        </td>
+                    
+                    `;
+                    gradeList.appendChild(row);
+                });
+
+            } catch (error) {
+                console.error("Error fetching grades:", error);
+                document.getElementById("gradeList").innerHTML = "<tr><td colspan='4'>Failed to load grades.</td></tr>";
+            }
+        });
+
+        document.addEventListener("DOMContentLoaded", async () => {
+    try {
+        const response = await fetch('http://localhost:3000/api/get_grades');
+        const grades = await response.json();
+        console.log("📋 Grades Data:", grades);  // ✅ Add this for debugging
+    } catch (error) {
+        console.error("❌ Error fetching grades:", error);
+    }
+
+    async function submitEvaluation(projectId) {
+    const totalMarks = parseInt(document.getElementById("marksInput").value);
+
+    const response = await fetch("/api/evaluate_project", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            projectId,
+               // ✅ Ensure marks are treated as a number
+            comments: "Well done",
+            studentEmail: "student@example.com"
+        })
+    });
+
+    const result = await response.json();
+    console.log(result);
+}
+
+});
+
+    </script>
+</body>
+</html>
+
