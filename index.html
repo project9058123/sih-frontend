@@ -36,26 +36,27 @@
     <section class="container mt-5">
         <h2>Project Submission</h2>
         <p class="mb-4">Submit your project details below to begin your journey.</p>
-        <form id="projectForm" class="row g-3" enctype="multipart/form-data">
+        <form id="projectForm" enctype="multipart/form-data">
+
             <div class="col-md-6">
                 <label for="studentName" class="form-label">Student Name</label>
-                <input type="text" class="form-control" id="studentName" placeholder="Enter your name" required>
+                <input type="text" class="form-control" id="studentName" name="studentName" placeholder="Enter your name" required>
             </div>
             <div class="col-md-6">
                 <label for="email" class="form-label">Email ID</label>
-                <input type="text" class="form-control" id="email" placeholder="Enter your EMAIL" required>
+                <input type="email" class="form-control" id="email" name="email" placeholder="Enter your EMAIL" required>
             </div>
             <div class="col-md-6">
                 <label for="rollNumber" class="form-label">Roll Number</label>
-                <input type="text" class="form-control" id="rollNumber" placeholder="Enter your roll number" required>
+                <input type="text" class="form-control" id="rollNumber" name="rollNumber" placeholder="Enter your roll number" required>
             </div>
             <div class="col-12">
                 <label for="projectTitle" class="form-label">Project Title</label>
-                <input type="text" class="form-control" id="projectTitle" placeholder="Enter your project title" required>
+                <input type="text" class="form-control" id="projectTitle" name="projectTitle" placeholder="Enter your project title" required>
             </div>
             <div class="col-12">
                 <label for="projectFile" class="form-label">Upload Project File</label>
-                <input type="file" class="form-control" id="projectFile" required>
+                <input type="file" class="form-control" id="projectFile" name="projectFile" required>
             </div>
             <div class="col-12">
                 <button type="submit" class="btn btn-primary">Submit Your Project</button>
@@ -65,45 +66,46 @@
 
     <!-- JavaScript -->
      <script>
-    document.getElementById('projectForm').addEventListener('submit', async function(event) {
-        event.preventDefault();
-    
-        alert('Your project is getting submitted successfully.');
-    
-        const studentName = document.getElementById('studentName').value;
-        const rollNumber = document.getElementById('rollNumber').value;
-        const projectTitle = document.getElementById('projectTitle').value;
-        const email = document.getElementById('email').value;  // 🔹 Add this line
-        const projectFile = document.getElementById('projectFile').files[0];
-    
-        if (studentName && rollNumber && projectTitle && email && projectFile) {  // 🔹 Add 'email' check
-            const formData = new FormData();
-            formData.append('studentName', studentName);
-            formData.append('rollNumber', rollNumber);
-            formData.append('projectTitle', projectTitle);
-            formData.append('email', email);  // 🔹 Add email here
-            formData.append('projectFile', projectFile);
-    
-            try {
-                const response = await fetch('http://localhost:3000/api/projects', {
-                    method: 'POST',
-                    body: formData,
-                });
-    
-                if (response.ok) {
-                    alert('Project submitted successfully!');
-                    window.location.href = 'project-submitted.html';
-                } else {
-                    alert('Failed to submit the project. Please try again.');
-                }
-            } catch (error) {
-                console.error('Error submitting project:', error);
-                alert('An error occurred. Please try again later.');
-            }
-        } else {
-            alert('Please fill in all fields and upload a file.');
+   
+   document.getElementById("projectForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const formData = new FormData(event.target);
+
+    try {
+        const response = await fetch("http://localhost:3000/api/projects", {
+            method: "POST",
+            body: formData, // Automatically sets Content-Type to multipart/form-data
+        });
+
+        if (!response.ok) {
+            throw new Error("Server Error: " + response.statusText);
         }
-    });
+
+        const result = await response.json();
+        if (result.success) {
+            alert("✅ Project submitted successfully!");
+        } else {
+            alert("❌ Error: " + result.message);
+        }
+    } catch (error) {
+        console.error("❌ Upload Error:", error);
+        alert("Failed to submit project. Try again.");
+    }
+});
+
+const formData = new FormData();
+formData.append("projectFile", fileInput.files[0]); // Ensure fileInput is your file input element
+
+fetch("http://localhost:3000/api/projects", {
+    method: "POST",
+    body: formData
+})
+.then(response => response.json())
+.then(data => console.log(data))
+.catch(error => console.error("Upload error:", error));
+
+
 </script>
 
     <!-- Footer -->
