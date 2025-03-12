@@ -14,11 +14,76 @@
                 <th>Project Title</th>
                 <th>Student Name</th>
                 <th>Roll Number</th>
+                <th>Project File</th>
                 <th>Action</th>
             </tr>
         </thead>
         <tbody id="projectList"></tbody>
     </table>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            try {
+                const response = await fetch("http://localhost:3000/api/get_projects");
+                const projects = await response.json();
+                const projectList = document.getElementById("projectList");
+
+                if (!Array.isArray(projects) || projects.length === 0) {
+                    projectList.innerHTML = "<tr><td colspan='5'>No projects available.</td></tr>";
+                    return;
+                }
+
+                projects.forEach(project => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td>${project.project_title}</td>
+                        <td>${project.student_name}</td>
+                        <td>${project.roll_number}</td>
+                        <td><a href="${project.project_file}" target="_blank">Download</a></td>
+                        <td>
+                            <button class="publish-btn" 
+                                onclick="publishResult('${project.project_id}', '${project.student_email}', this)">
+                                Publish Result
+                            </button>
+                        </td>
+                    `;
+                    projectList.appendChild(row);
+                });
+            } catch (error) {
+                console.error("Error fetching projects:", error);
+                document.getElementById("projectList").innerHTML = "<tr><td colspan='5'>Failed to load projects.</td></tr>";
+            }
+        });
+
+        async function publishResult(projectId, studentEmail, button) {
+            button.disabled = true;
+            button.textContent = "Publishing...";
+
+            try {
+                const response = await fetch("http://localhost:3000/api/publish_result", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ projectId, studentEmail })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    alert("✅ Result published successfully and email sent!");
+                    button.textContent = "Published ✅";
+                    button.style.backgroundColor = "#28a745";
+                } else {
+                    alert("❌ Error: " + result.message);
+                    button.disabled = false;
+                    button.textContent = "Publish Result";
+                }
+            } catch (error) {
+                console.error("Error publishing result:", error);
+                alert("❌ Failed to publish result. Please try again.");
+                button.disabled = false;
+                button.textContent = "Publish Result";
+            }
+        }
+    </script>
 
     <style>
         body {
@@ -85,68 +150,5 @@
         }
     </style>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", async () => {
-            try {
-                const response = await fetch("http://localhost:3000/api/get_projects"); // Fixed API URL
-                const projects = await response.json();
-
-                const projectList = document.getElementById("projectList"); // Corrected reference
-
-                if (!Array.isArray(projects) || projects.length === 0) {
-                    projectList.innerHTML = "<tr><td colspan='4'>No projects available.</td></tr>";
-                    return;
-                }
-
-                projects.forEach(project => {
-                    const row = document.createElement("tr");
-                    row.innerHTML = `
-                        <td>${project.project_title}</td>
-                        <td>${project.student_name}</td>
-                        <td>${project.roll_number}</td>
-                        <td>
-                            <button class="publish-btn" 
-                                onclick="publishResult('${project.project_id}', '${project.student_email}', this)">
-                                Publish Result
-                            </button>
-                        </td>
-                    `;
-                    projectList.appendChild(row); // Fixed incorrect variable name
-                });
-            } catch (error) {
-                console.error("❌ Error fetching projects:", error);
-                document.getElementById("projectList").innerHTML = "<tr><td colspan='4'>Failed to load projects.</td></tr>"; // Fixed reference
-            }
-        });
-
-        async function publishResult(projectId, studentEmail, button) {
-            button.disabled = true;
-            button.textContent = "Publishing...";
-
-            try {
-                const response = await fetch("https://project-6hel.onrender.com/api/publish_result", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ projectId, studentEmail })
-                });
-
-                const result = await response.json();
-                if (result.success) {
-                    alert("✅ Result published successfully and email sent!");
-                    button.textContent = "Published ✅";
-                    button.style.backgroundColor = "#28a745";
-                } else {
-                    alert("❌ Error: " + result.message);
-                    button.disabled = false;
-                    button.textContent = "Publish Result";
-                }
-            } catch (error) {
-                console.error("❌ Error publishing result:", error);
-                alert("❌ Failed to publish result. Please try again.");
-                button.disabled = false;
-                button.textContent = "Publish Result";
-            }
-        }
-    </script>
 </body>
 </html>
