@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grades Page</title>
+    <title>Project Submissions</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h2>Project Grades</h2>
+    <h2>Project Submissions</h2>
     <table>
         <thead>
             <tr>
@@ -15,130 +15,138 @@
                 <th>Student Name</th>
                 <th>Roll Number</th>
                 <th>Action</th>
-                
             </tr>
         </thead>
-        <tbody id="gradeList">
-            <!-- Grades will be displayed here -->
-        </tbody>
+        <tbody id="projectList"></tbody>
     </table>
+
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+        }
 
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f9;
-    margin: 0;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    height: 100vh;
-}
+        h2 {
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
 
-h2 {
-    color: #4CAF50;
-    margin-bottom: 20px;
-}
+        table {
+            width: 80%;
+            border-collapse: collapse;
+            background-color: #ffffff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
 
-table {
-    width: 80%;
-    border-collapse: collapse;
-    background-color: #ffffff;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
-    overflow: hidden;
-}
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px 15px;
+            text-align: left;
+        }
 
-th, td {
-    border: 1px solid #ddd;
-    padding: 12px 15px;
-    text-align: left;
-}
+        th {
+            background-color: #4CAF50;
+            color: #ffffff;
+        }
 
-th {
-    background-color: #4CAF50;
-    color: #ffffff;
-}
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
 
-tr:nth-child(even) {
-    background-color: #f9f9f9;
-}
+        tr:hover {
+            background-color: #f1f1f1;
+            cursor: pointer;
+        }
 
-tr:hover {
-    background-color: #f1f1f1;
-    cursor: pointer;
-}
+        td {
+            color: #333;
+        }
 
-td {
-    color: #333;
-}
+        .publish-btn {
+            padding: 8px 12px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
 
+        .publish-btn:disabled {
+            background-color: #aaa;
+            cursor: not-allowed;
+        }
     </style>
 
     <script>
         document.addEventListener("DOMContentLoaded", async () => {
             try {
-                const response = await fetch('http://localhost:3000/api/get_grades');
-                // API to fetch saved grades
-                const grades = await response.json();
-                const gradeList = document.getElementById("gradeList");
+                const response = await fetch("http://localhost:3000/api/get_projects"); // Fixed API URL
+                const projects = await response.json();
 
-                if (grades.length === 0) {
-                    gradeList.innerHTML = "<tr><td colspan='4'>No grades available.</td></tr>";
+                const projectList = document.getElementById("projectList"); // Corrected reference
+
+                if (!Array.isArray(projects) || projects.length === 0) {
+                    projectList.innerHTML = "<tr><td colspan='4'>No projects available.</td></tr>";
                     return;
                 }
 
-                grades.forEach(grade => {
+                projects.forEach(project => {
                     const row = document.createElement("tr");
                     row.innerHTML = `
-                        <td>${grade.project_title}</td>
-                        <td>${grade.student_name}</td>
-                        <td>${grade.roll_number}</td>
-
+                        <td>${project.project_title}</td>
+                        <td>${project.student_name}</td>
+                        <td>${project.roll_number}</td>
                         <td>
-                            <button class="publish-btn" onclick="publishResult('${grade.projectId}')">Publish Result</button>
+                            <button class="publish-btn" 
+                                onclick="publishResult('${project.project_id}', '${project.student_email}', this)">
+                                Publish Result
+                            </button>
                         </td>
-                    
                     `;
-                    gradeList.appendChild(row);
+                    projectList.appendChild(row); // Fixed incorrect variable name
                 });
-
             } catch (error) {
-                console.error("Error fetching grades:", error);
-                document.getElementById("gradeList").innerHTML = "<tr><td colspan='4'>Failed to load grades.</td></tr>";
+                console.error("❌ Error fetching projects:", error);
+                document.getElementById("projectList").innerHTML = "<tr><td colspan='4'>Failed to load projects.</td></tr>"; // Fixed reference
             }
         });
 
-        document.addEventListener("DOMContentLoaded", async () => {
-    try {
-        const response = await fetch('http://localhost:3000/api/get_grades');
-        const grades = await response.json();
-        console.log("📋 Grades Data:", grades);  // ✅ Add this for debugging
-    } catch (error) {
-        console.error("❌ Error fetching grades:", error);
-    }
+        async function publishResult(projectId, studentEmail, button) {
+            button.disabled = true;
+            button.textContent = "Publishing...";
 
-    async function submitEvaluation(projectId) {
-    const totalMarks = parseInt(document.getElementById("marksInput").value);
+            try {
+                const response = await fetch("https://project-6hel.onrender.com/api/publish_result", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ projectId, studentEmail })
+                });
 
-    const response = await fetch("/api/evaluate_project", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            projectId,
-               // ✅ Ensure marks are treated as a number
-            comments: "Well done",
-            studentEmail: "student@example.com"
-        })
-    });
-
-    const result = await response.json();
-    console.log(result);
-}
-
-});
-
+                const result = await response.json();
+                if (result.success) {
+                    alert("✅ Result published successfully and email sent!");
+                    button.textContent = "Published ✅";
+                    button.style.backgroundColor = "#28a745";
+                } else {
+                    alert("❌ Error: " + result.message);
+                    button.disabled = false;
+                    button.textContent = "Publish Result";
+                }
+            } catch (error) {
+                console.error("❌ Error publishing result:", error);
+                alert("❌ Failed to publish result. Please try again.");
+                button.disabled = false;
+                button.textContent = "Publish Result";
+            }
+        }
     </script>
 </body>
 </html>
-
