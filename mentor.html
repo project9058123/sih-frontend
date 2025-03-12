@@ -66,35 +66,17 @@
             }
         });
 
-        async function submitEvaluation(projectId) {
-            const marks = document.getElementById(`marks-${projectId}`).value;
-            if (!marks || marks < 0 || marks > 50) {
-                alert("Please enter valid marks (0-50).");
-                return;
-            }
+        function submitEvaluation(projectId) {
+    const marks = document.getElementById(`marks-${projectId}`).value;
+    if (!marks || marks < 0 || marks > 50) {
+        alert("Please enter valid marks (0-50).");
+        return;
+    }
 
-            try {
-                const response = await fetch('http://localhost:3000/api/save_grade', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        projectId: projectId, 
-                        total: marks 
-                    })
-                });
+    alert(`Marks: ${marks} recorded but not saved.`);
+}
 
-                const result = await response.json();
-                if (response.ok) {
-                    alert(result.message);
-                } else {
-                    alert("Error: " + (result.message || "Something went wrong"));
-                }
-            } catch (error) {
-                console.error("Error submitting marks:", error);
-                alert("Failed to save marks. Please try again.");
-            }
-        }
-    </script>
+            </script>
 
     <style>
         /* General Styles */
