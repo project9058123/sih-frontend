@@ -36,7 +36,7 @@
     <section class="container mt-5">
         <h2>Project Submission</h2>
         <p class="mb-4">Submit your project details below to begin your journey.</p>
-        <form id="projectForm" enctype="multipart/form-data">
+        <form id="projectForm" enctype="multipart/form-data" method="POST">
 
             <div class="col-md-6">
                 <label for="studentName" class="form-label">Student Name</label>
@@ -58,55 +58,41 @@
                 <label for="projectFile" class="form-label">Upload Project File</label>
                 <input type="file" class="form-control" id="projectFile" name="projectFile" required>
             </div>
-            <div class="col-12">
+            <div class="col-12 mt-3">
                 <button type="submit" class="btn btn-primary">Submit Your Project</button>
             </div>
         </form>
     </section>
 
     <!-- JavaScript -->
-     <script>
-   
-   document.getElementById("projectForm").addEventListener("submit", async (event) => {
-    event.preventDefault();
+    <script>
+        document.getElementById("projectForm").addEventListener("submit", async (event) => {
+            event.preventDefault(); // Prevent default form submission
 
-    const formData = new FormData(event.target);
+            const formData = new FormData(event.target); // Get form data
 
-    try {
-        const response = await fetch("http://localhost:3000/api/projects", {
-            method: "POST",
-            body: formData, // Automatically sets Content-Type to multipart/form-data
+            try {
+                const response = await fetch("http://localhost:3000/api/projects", {
+                    method: "POST",
+                    body: formData, // Automatically sets Content-Type to multipart/form-data
+                });
+
+                if (!response.ok) {
+                    throw new Error("Server Error: " + response.statusText);
+                }
+
+                const result = await response.json();
+                if (result.success) {
+                    alert("✅ Project submitted successfully!");
+                } else {
+                    alert("❌ Error: " + result.message);
+                }
+            } catch (error) {
+                console.error("❌ Upload Error:", error);
+                alert("Failed to submit project. Try again.");
+            }
         });
-
-        if (!response.ok) {
-            throw new Error("Server Error: " + response.statusText);
-        }
-
-        const result = await response.json();
-        if (result.success) {
-            alert("✅ Project submitted successfully!");
-        } else {
-            alert("❌ Error: " + result.message);
-        }
-    } catch (error) {
-        console.error("❌ Upload Error:", error);
-        alert("Failed to submit project. Try again.");
-    }
-});
-
-const formData = new FormData();
-formData.append("projectFile", fileInput.files[0]); // Ensure fileInput is your file input element
-
-fetch("http://localhost:3000/api/projects", {
-    method: "POST",
-    body: formData
-})
-.then(response => response.json())
-.then(data => console.log(data))
-.catch(error => console.error("Upload error:", error));
-
-
-</script>
+    </script>
 
     <!-- Footer -->
     <footer class="footer mt-5 text-center py-4" style="background-color: #f1f1f1;">
