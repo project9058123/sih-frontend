@@ -32,8 +32,8 @@
                         <!-- Project Section -->
                         <div id="project-section">
                             <div class="project-item mb-3">
-                                <h6>Project Title: Innovative Solution</h6>
-                                <p>Description: A project focused on innovative solutions for modern problems.</p>
+                                
+                                <p>"The best evaluations dont just judge—they uplift, refine, and drive progress!".</p>
                                 <button class="btn btn-primary btn-evaluate evaluate-btn" data-project="project1.pdf">Evaluate</button>
                                 
 
@@ -94,6 +94,49 @@
 };
 
     </script>
+    <body style="background-color: #f4f4f4;">
+        <style>
+            body {
+                background-image: url('kpp.jpg'); /* Replace with your image URL */
+                background-size: cover; /* Ensures the image covers the entire background */
+                background-position: center; /* Centers the image */
+                background-repeat: no-repeat; /* Prevents image repetition */
+                background-attachment: fixed; /* Keeps the background fixed while scrolling */
+            }
+        
+            .card {
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                transition: transform 0.2s ease-in-out;
+                background: rgba(255, 255, 255, 0.8); /* Adds a slight white background for readability */
+                border-radius: 10px;
+                padding: 20px;
+            }
+        
+            .card:hover {
+                transform: translateY(-5px);
+            }
+        
+            .btn-evaluate {
+                margin-right: 10px;
+            }
+            body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('kpp.jpg');
+    background-size: cover;
+    background-position: center;
+    filter: blur(5px);
+    z-index: -1;
+}
+
+        </style>
+        
+
+    
 </body>
 </html>
 
