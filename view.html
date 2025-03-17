@@ -324,6 +324,21 @@ function showRejectPrompt(projectId) {
     });
 });
 
+app.get('/download/:filename', (req, res) => {
+    const fileName = req.params.filename;
+    const filePath = path.join(__dirname, 'uploads', fileName);
+
+    res.download(filePath, fileName, (err) => {
+        if (err) {
+            console.error("❌ Error downloading file:", err);
+            res.status(500).send("Error downloading file.");
+        }
+    });
+});
+const fileUrl = encodeURIComponent("Final copy.pdf");
+const downloadLink = `http://localhost:3000/uploads/${fileUrl}`;
+
+
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 </body>
