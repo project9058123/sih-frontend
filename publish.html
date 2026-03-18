@@ -5,78 +5,179 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Publish Result</title>
     <link rel="stylesheet" href="styles.css">
-
     <style>
-
-body {
-    font-family: Arial, sans-serif;
-    text-align: center;
-    background-color: #f4f4f4;
-}
-
-.container {
-    width: 50%;
-    margin: 50px auto;
-    padding: 20px;
-    background: white;
-    box-shadow: 0px 0px 10px gray;
-    border-radius: 8px;
-}
-
-.result-box {
-    padding: 20px;
-}
-
-button, .back-btn {
-    display: block;
-    width: 80%;
-    margin: 10px auto;
-    padding: 10px;
-    font-size: 16px;
-    border: none;
-    cursor: pointer;
-    border-radius: 5px;
-}
-
-#publish-btn {
-    background: green;
-    color: white;
-}
-
-.back-btn {
-    background: #007BFF;
-    color: white;
-    text-decoration: none;
-    text-align: center;
-    padding: 10px 0;
-}
-
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 50%;
+            margin: 50px auto;
+            padding: 20px;
+            background: white;
+            box-shadow: 0px 0px 10px gray;
+            border-radius: 8px;
+        }
+        .result-box {
+            padding: 20px;
+        }
+        button, .back-btn {
+            display: block;
+            width: 80%;
+            margin: 10px auto;
+            padding: 10px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        #publish-btn {
+            background: green;
+            color: white;
+        }
+        .back-btn {
+            background: #007BFF;
+            color: white;
+            text-decoration: none;
+            text-align: center;
+            padding: 10px 0;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h2>📢 Publish Student Results</h2>
         <div class="result-box">
-            <p><strong>Student Email:</strong> <span id="student-email"></span></p>
-            <p><strong>Total Marks:</strong> <span id="student-marks"></span> / 50</p>
+            <p><strong>Student Email:</strong> <span id="student-email">Loading...</span></p>
+            <p><strong>Total Marks:</strong> <span id="student-marks">Loading...</span> / 50</p>
             <button id="publish-btn">✅ Publish Result</button>
             <a href="login.html" class="back-btn">⬅️ Back to Dashboard</a>
         </div>
     </div>
 
-    <script>
-        // Get data from URL parameters
-        const urlParams = new URLSearchParams(window.location.search);
-        document.getElementById("student-email").innerText = urlParams.get("email") || "N/A";
-        document.getElementById("student-marks").innerText = urlParams.get("total") || "N/A";
+    
 
-        document.getElementById("publish-btn").addEventListener("click", function() {
-            if (confirm("Are you sure you want to publish this result?")) {
-                alert("Result Published Successfully! ✅");
-                // Here you can add an API call to update the database
+    <script>
+        async function fetchMarks() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const email = urlParams.get("email");
+
+            if (!email) {
+                document.getElementById("student-email").innerText = "N/A";
+                document.getElementById("student-marks").innerText = "N/A";
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/get_student_marks?email=${encodeURIComponent(email)}`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    document.getElementById("student-email").innerText = data.email;
+                    document.getElementById("student-marks").innerText = data.total;
+                } else {
+                    document.getElementById("student-email").innerText = email;
+                    document.getElementById("student-marks").innerText = "No marks found";
+                }
+            } catch (error) {
+                console.error("Error fetching marks:", error);
+                document.getElementById("student-email").innerText = email;
+                document.getElementById("student-marks").innerText = "Error fetching data";
+            }
+        }
+
+        document.getElementById("publish-btn").addEventListener("click", async function () {
+            if (!confirm("Are you sure you want to publish this result?")) return;
+
+            const email = document.getElementById("student-email").innerText;
+            const total = document.getElementById("student-marks").innerText;
+
+            if (email === "Loading..." || total === "Loading...") {
+                alert("Invalid student data. Please try again.");
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/publish_result', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, total })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    alert("✅ Result Published Successfully! Email sent to student.");
+                } else {
+                    alert("❌ Failed to publish result: " + result.message);
+                }
+            } catch (error) {
+                console.error("Error publishing result:", error);
+                alert("❌ An error occurred while publishing the result.");
             }
         });
+
+        function publishResult(projectId) {
+    const marks = prompt("Enter marks for this project:");
+
+    if (marks === null || marks.trim() === "") {
+        alert("Marks are required!");
+        return;
+    }
+
+    fetch('http://localhost:3000/api/publish_result', {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ projectId, marks })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert("✅ Result published and email sent to Admin.");
+        } else {
+            alert("❌ Error publishing result: " + data.message);
+        }
+    })
+    .catch(error => {
+        console.error("❌ Error:", error);
+        alert("❌ Failed to publish result.");
+    });
+}
+
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            try {
+                const response = await fetch("/api/get_student_marks");
+                const data = await response.json();
+
+                if (data.success) {
+                    data.students.forEach((student) => {
+                        const { email, marks } = student;
+                        if (email) {
+                            fetch("/api/publish_result", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ email, marks }),
+                            })
+                            .then(response => response.json())
+                            .then(result => {
+                                console.log("Result published:", result);
+                            })
+                            .catch(error => console.error("Error publishing result:", error));
+                        }
+                    });
+                } else {
+                    console.error("Failed to fetch student marks.");
+                }
+            } catch (error) {
+                console.error("Error fetching marks:", error);
+            }
+        });
+
+        // Fetch marks when the page loads
+        fetchMarks();
     </script>
 </body>
 </html>
-
